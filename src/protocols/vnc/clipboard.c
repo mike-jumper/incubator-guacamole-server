@@ -119,6 +119,24 @@ int guac_vnc_clipboard_end_handler(guac_user* user, guac_stream* stream) {
     return 0;
 }
 
+void guac_vnc_send_magic_resize(guac_client* client, int width, int height) {
+
+    guac_vnc_client* vnc_client = (guac_vnc_client*) client->data;
+    rfbClient* rfb_client = vnc_client->rfb_client;
+
+    char output_data[GUAC_VNC_CLIPBOARD_MAX_LENGTH];
+
+    /* Create "magic" resize packet */
+    int written = snprintf(output_data, sizeof(output_data),
+            "[BEGIN RESIZE]\n%i\n%i\n[END RESIZE]\n",
+            width, height);
+
+    /* Only send packet if it was not truncated */
+    if (written < sizeof(output_data))
+        SendClientCutText(rfb_client, output_data, written);
+
+}
+
 void guac_vnc_cut_text(rfbClient* client, const char* text, int textlen) {
 
     guac_client* gc = rfbClientGetClientData(client, GUAC_VNC_CLIENT_KEY);

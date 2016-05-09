@@ -76,5 +76,24 @@ guac_user_end_handler guac_vnc_clipboard_end_handler;
  */
 void guac_vnc_cut_text(rfbClient* client, const char* text, int textlen);
 
+/**
+ * Sends the "magic resize" packet via the clipboard, such that the included
+ * "resize-daemon.sh" script can automatically handle the change to the screen
+ * resolution. If the resize daemon is not running in the background, this
+ * will result in strange clipboard contents being set whenever the browser
+ * window is resized.
+ *
+ * @param client
+ *     The guac_client associated with the VNC session over which the magic
+ *     screen resize packet should be sent.
+ *
+ * @param width
+ *     The new screen width, in pixels.
+ *
+ * @param height
+ *     The new screen height, in pixels.
+ */
+void guac_vnc_send_magic_resize(guac_client* client, int width, int height);
+
 #endif
 

@@ -94,6 +94,7 @@ int guac_vnc_user_join_handler(guac_user* user, int argc, char** argv) {
         /* General mouse/keyboard/clipboard events */
         user->mouse_handler     = guac_vnc_user_mouse_handler;
         user->key_handler       = guac_vnc_user_key_handler;
+        user->size_handler      = guac_vnc_user_size_handler;
         user->clipboard_handler = guac_vnc_clipboard_handler;
 
 #ifdef ENABLE_COMMON_SSH

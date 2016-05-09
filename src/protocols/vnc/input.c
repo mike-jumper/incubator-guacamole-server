@@ -21,6 +21,7 @@
 
 #include "common/cursor.h"
 #include "common/display.h"
+#include "clipboard.h"
 #include "vnc.h"
 
 #include <guacamole/user.h>
@@ -46,5 +47,13 @@ int guac_vnc_user_key_handler(guac_user* user, int keysym, int pressed) {
     SendKeyEvent(vnc_client->rfb_client, keysym, pressed);
 
     return 0;
+}
+
+int guac_vnc_user_size_handler(guac_user* user, int width, int height) {
+
+    /* Send the magic packet */
+    guac_vnc_send_magic_resize(user->client, width, height);
+    return 0;
+
 }
 
