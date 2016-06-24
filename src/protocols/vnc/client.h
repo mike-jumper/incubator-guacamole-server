@@ -26,14 +26,19 @@
 /**
  * The maximum duration of a frame in milliseconds.
  */
-#define GUAC_VNC_FRAME_DURATION 40
+#define GUAC_VNC_FRAME_DURATION 200
 
 /**
- * The amount of time to allow per message read within a frame, in
- * milliseconds. If the server is silent for at least this amount of time, the
- * frame will be considered finished.
+ * The factor to apply to the dynamic timeout calculations to account for
+ * jitter. Resulting timeout values will be estimated while taking into account
+ * an expected margin of error of this factor. For example, if this value is 3
+ * (the current value), dynamic timeout calculations will be assumed to be
+ * accurate only within a factor of 3, and the resulting estimated timeout will
+ * be adjusted by a factor of 3 in the direction of the expected error:
+ * multiplied by 3 if the value is likely to be too small, and divided by 3 if
+ * the value is likely to be too large.
  */
-#define GUAC_VNC_FRAME_TIMEOUT 0
+#define GUAC_VNC_FRAME_TIMEOUT_FACTOR 3
 
 /**
  * The amount of time to wait for a new message from the VNC server when

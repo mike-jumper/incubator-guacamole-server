@@ -352,7 +352,9 @@ void* guac_vnc_client_thread(void* data) {
 
     guac_socket_flush(client->socket);
 
+    int last_frame_duration = 0;
     guac_timestamp last_frame_end = guac_timestamp_current();
+    guac_timestamp last_frame_complete = last_frame_end;
 
     /* Handle messages from VNC server while client is running */
     while (client->state == GUAC_CLIENT_RUNNING) {
@@ -364,6 +366,14 @@ void* guac_vnc_client_thread(void* data) {
 
             int processing_lag = guac_client_get_processing_lag(client);
             guac_timestamp frame_start = guac_timestamp_current();
+
+            /* Calculate the amount of time spent between frames */
+            int frame_spacing = frame_start - last_frame_complete;
+
+            /* Estimate an appropriate frame timeout given frame timings */
+            int frame_timeout = frame_spacing / GUAC_VNC_FRAME_TIMEOUT_FACTOR;
+            if (frame_timeout > last_frame_duration * GUAC_VNC_FRAME_TIMEOUT_FACTOR)
+                frame_timeout = last_frame_duration * GUAC_VNC_FRAME_TIMEOUT_FACTOR;
 
             /* Read server messages until frame is built */
             do {
@@ -384,19 +394,23 @@ void* guac_vnc_client_thread(void* data) {
                 frame_remaining = frame_start + GUAC_VNC_FRAME_DURATION
                                 - frame_end;
 
+                /* Update frame duration and completion before wait occurs */
+                last_frame_duration = frame_end - frame_start;
+                last_frame_complete = frame_end;
+
                 /* Calculate time that client needs to catch up */
                 int time_elapsed = frame_end - last_frame_end;
                 int required_wait = processing_lag - time_elapsed;
 
                 /* Increase the duration of this frame if client is lagging */
-                if (required_wait > GUAC_VNC_FRAME_TIMEOUT)
+                if (required_wait > frame_timeout)
                     wait_result = guac_vnc_wait_for_messages(rfb_client,
                             required_wait*1000);
 
                 /* Wait again if frame remaining */
                 else if (frame_remaining > 0)
                     wait_result = guac_vnc_wait_for_messages(rfb_client,
-                            GUAC_VNC_FRAME_TIMEOUT*1000);
+                            frame_timeout*1000);
                 else
                     break;
 
