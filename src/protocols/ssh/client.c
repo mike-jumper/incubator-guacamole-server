@@ -34,6 +34,13 @@
 
 int guac_client_init(guac_client* client) {
 
+    /* Always init SSH base libraries */
+    if (guac_common_ssh_init(client)) {
+        guac_client_log(client, GUAC_LOG_ERROR,
+                "SSH library initialization failed");
+        return 1;
+    }
+
     /* Set client args */
     client->args = GUAC_SSH_CLIENT_ARGS;
 
@@ -61,6 +68,10 @@ int guac_client_init(guac_client* client) {
 int guac_ssh_client_free_handler(guac_client* client) {
 
     guac_ssh_client* ssh_client = (guac_ssh_client*) client->data;
+
+    /* No need to clean up if client never started */
+    if (ssh_client == NULL)
+        return 0;
 
     /* Close SSH channel */
     if (ssh_client->term_channel != NULL) {
@@ -99,7 +110,11 @@ int guac_ssh_client_free_handler(guac_client* client) {
     /* Free client structure */
     free(ssh_client);
 
+    /* Clean up after common SSH library */
     guac_common_ssh_uninit();
+
+    /* Done */
     return 0;
+
 }
 
