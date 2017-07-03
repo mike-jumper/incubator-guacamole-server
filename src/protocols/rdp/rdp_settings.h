@@ -359,6 +359,12 @@ typedef struct guac_rdp_settings {
      * the destination directory is otherwise ambiguous).
      */
     char* sftp_directory;
+
+    /**
+     * The path of the directory within the SSH server to expose as a
+     * filesystem guac_object.
+     */
+    char* sftp_root_directory;
 #endif
 
     /**
