@@ -48,6 +48,7 @@ libguacinc_HEADERS =                  \
     guacamole/pool-types.h            \
     guacamole/protocol.h              \
     guacamole/protocol-types.h        \
+    guacamole/scroll.h                \
     guacamole/socket-constants.h      \
     guacamole/socket.h                \
     guacamole/socket-fntypes.h        \
@@ -84,6 +85,7 @@ libguac_la_SOURCES =   \
     pool.c             \
     protocol.c         \
     raw_encoder.c      \
+    scroll.c           \
     socket.c           \
     socket-broadcast.c \
     socket-fd.c        \
