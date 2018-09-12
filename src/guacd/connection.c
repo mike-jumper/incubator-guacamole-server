@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include "connection.h"
+#include "dump.h"
 #include "log.h"
 #include "move-fd.h"
 #include "proc.h"
@@ -72,6 +73,8 @@ static int __write_all(int fd, char* buffer, int length) {
         int written = write(fd, buffer, length);
         if (written < 0)
             return -1;
+
+        dump("write-log.txt", buffer, written);
 
         length -= written;
         buffer += written;
