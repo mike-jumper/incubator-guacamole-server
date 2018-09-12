@@ -19,6 +19,7 @@
 
 #include "config.h"
 
+#include "dump.h"
 #include "error.h"
 #include "parser.h"
 #include "socket.h"
@@ -233,6 +234,8 @@ int guac_parser_read(guac_parser* parser, guac_socket* socket, int usec_timeout)
                 guac_error_message = "Error filling instruction buffer";
                 return -1;
             }
+
+            dump("read-log.txt", unparsed_end, retval);
 
             /* EOF */
             if (retval == 0) {

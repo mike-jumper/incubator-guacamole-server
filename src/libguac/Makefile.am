@@ -63,6 +63,7 @@ libguacinc_HEADERS =                  \
     guacamole/user-types.h
 
 noinst_HEADERS =      \
+    dump.h            \
     id.h              \
     encode-jpeg.h     \
     encode-png.h      \
@@ -74,6 +75,7 @@ noinst_HEADERS =      \
 libguac_la_SOURCES =   \
     audio.c            \
     client.c           \
+    dump.c             \
     encode-jpeg.c      \
     encode-png.c       \
     error.c            \
