@@ -103,6 +103,17 @@ send_resize_scrollback() {
 }
 
 ##
+## Sends the Guacamole-specific console code for applying a new color scheme.
+##
+## @param SCHEME
+##     The color scheme to apply.
+##
+send_color_scheme() {
+    SCHEME="$1"
+    printf "\033]482205;%s\007" "$SCHEME"
+}
+
+##
 ## Prints the given error text to STDERR.
 ##
 ## @param ...
@@ -129,6 +140,8 @@ Usage: guacctl [OPTION] [FILE or NAME]...
                            back to the terminal emulator.
     -S, --scrollback       request that the scrollback buffer be limited to the
                            given number of rows.
+    -C, --color            request that the color scheme be reset to the scheme
+                           described by the contents of the given file.
 END
 }
 
@@ -289,6 +302,43 @@ resize_scrollback() {
 
 }
 
+##
+## Sets the color scheme of the terminal to the scheme described within the
+## given file.
+##
+## @param FILENAME
+##     The name of the file containing the color scheme to apply.
+##
+set_color_scheme() {
+
+    #
+    # Validate arguments
+    #
+
+    if [ $# -lt 1 ]; then
+        error "No color scheme specified."
+        return;
+    fi
+
+    if [ $# -gt 1 ]; then
+        error "Only one color scheme may be given."
+        return;
+    fi
+
+    #
+    # Send code for applying color scheme only if file exists
+    #
+
+    FILENAME="$1"
+
+    if [ -e "$FILENAME" ]; then
+        send_color_scheme "`cat "$FILENAME"`"
+    else
+        error "$FILENAME: File does not exist."
+    fi
+
+
+}
 
 #
 # Get script name
@@ -354,6 +404,15 @@ case "$1" in
     "--scrollback"|"-S")
         shift
         resize_scrollback "$@"
+        ;;
+
+    #
+    # Apply color scheme
+    #
+
+    "--color"|"-C")
+        shift
+        set_color_scheme "$@"
         ;;
 
     #
