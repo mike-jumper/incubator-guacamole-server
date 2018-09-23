@@ -170,6 +170,19 @@ int guac_terminal_set_scrollback(guac_terminal* term, unsigned char c);
 int guac_terminal_window_title(guac_terminal* term, unsigned char c);
 
 /**
+ * Parses the remainder of an OSC sequence setting the color scheme of the
+ * terminal. The color scheme is everything after the sequence begins, up to
+ * the end of the OSC sequence itself.
+ *
+ * @param term
+ *     The terminal that received the given character of data.
+ *
+ * @param c
+ *     The character that was received by the given terminal.
+ */
+int guac_terminal_set_color_scheme(guac_terminal* term, unsigned char c);
+
+/**
  * Parses the remainder of xterm's OSC sequence for redefining the terminal
  * emulator's palette.
  *

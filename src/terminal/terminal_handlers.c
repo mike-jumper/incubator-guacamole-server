@@ -1271,6 +1271,32 @@ int guac_terminal_window_title(guac_terminal* term, unsigned char c) {
 
 }
 
+int guac_terminal_set_color_scheme(guac_terminal* term, unsigned char c) {
+
+    static int position = 0;
+    static char color_scheme[8192];
+
+    /* Stop on ECMA-48 ST (String Terminator */
+    if (c == 0x9C || c == 0x5C || c == 0x07) {
+
+        /* Terminate and reset stored color scheme */
+        color_scheme[position] = '\0';
+        position = 0;
+
+        /* Apply color scheme */
+        guac_terminal_apply_color_scheme(term, color_scheme);
+        term->char_handler = guac_terminal_echo;
+
+    }
+
+    /* Store all other characters within color scheme, space permitting */
+    else if (position < sizeof(color_scheme) - 1)
+        color_scheme[position++] = (char) c;
+
+    return 0;
+
+}
+
 int guac_terminal_xterm_palette(guac_terminal* term, unsigned char c) {
 
     /**
@@ -1382,6 +1408,10 @@ int guac_terminal_osc(guac_terminal* term, unsigned char c) {
         /* Set scrollback size OSC */
         else if (operation == 482204)
             term->char_handler = guac_terminal_set_scrollback;
+
+        /* Set pallette OSC */
+        else if (operation == 482205)
+            term->char_handler = guac_terminal_set_color_scheme;
 
         /* Set window title OSC */
         else if (operation == 0 || operation == 2)
