@@ -136,6 +136,10 @@ AC_SUBST([PULSE_INCLUDE], '-I$(top_srcdir)/src/pulse')
 AC_SUBST([COMMON_SSH_LTLIB],   '$(top_builddir)/src/common-ssh/libguac_common_ssh.la')
 AC_SUBST([COMMON_SSH_INCLUDE], '-I$(top_srcdir)/src/common-ssh')
 
+# VNC backend abstraction layer
+AC_SUBST([VNC_BACKEND_LTLIB],   '$(top_builddir)/src/protocols/vnc/backend/libguac_vnc_backend.la')
+AC_SUBST([VNC_BACKEND_INCLUDE], '-I$(top_srcdir)/src/protocols/vnc')
+
 # Terminal emulator
 AC_SUBST([TERMINAL_LTLIB],   '$(top_builddir)/src/terminal/libguac_terminal.la')
 AC_SUBST([TERMINAL_INCLUDE], '-I$(top_srcdir)/src/terminal $(PANGO_CFLAGS) $(PANGOCAIRO_CFLAGS) $(COMMON_INCLUDE)')
@@ -1348,7 +1352,8 @@ AC_CONFIG_FILES([Makefile
                  src/protocols/rdp/Makefile
                  src/protocols/ssh/Makefile
                  src/protocols/telnet/Makefile
-                 src/protocols/vnc/Makefile])
+                 src/protocols/vnc/Makefile
+                 src/protocols/vnc/backend/Makefile])
 AC_OUTPUT
 
 #

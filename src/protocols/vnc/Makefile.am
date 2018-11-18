@@ -27,6 +27,7 @@ AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I m4
 
 lib_LTLIBRARIES = libguac-client-vnc.la
+SUBDIRS = backend
 
 libguac_client_vnc_la_SOURCES = \
     auth.c                      \
@@ -57,16 +58,17 @@ libguac_client_vnc_la_CFLAGS =        \
     @COMMON_INCLUDE@                  \
     @COMMON_SSH_INCLUDE@              \
     @LIBGUAC_INCLUDE@                 \
-    @PULSE_INCLUDE@
+    @PULSE_INCLUDE@                   \
+    @VNC_BACKEND_INCLUDE@
 
 libguac_client_vnc_la_LDFLAGS = \
     -version-info 0:0:0         \
-    @CAIRO_LIBS@                \
-    @VNC_LIBS@ 
+    @CAIRO_LIBS@
 
 libguac_client_vnc_la_LIBADD = \
     @COMMON_LTLIB@             \
-    @LIBGUAC_LTLIB@
+    @LIBGUAC_LTLIB@            \
+    @VNC_BACKEND_LTLIB@
 
 # Optional SFTP support
 if ENABLE_COMMON_SSH
