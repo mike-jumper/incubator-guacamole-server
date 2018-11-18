@@ -436,24 +436,56 @@ fi
 AM_CONDITIONAL([ENABLE_TERMINAL], [test "x${have_terminal}" = "xyes"])
 
 #
+# VNC support (multiple possible backends)
+#
+
+vnc_backend=
+VNC_LIBS=
+AC_ARG_WITH([vnc],
+            [AS_HELP_STRING([--with-vnc],
+                            [support VNC (regardless of backend) @<:@default=check@:>@])],
+            [],
+            [with_vnc=check])
+
+#
+# RealVNC SDK
+#
+
+have_realvnc=disabled
+AC_ARG_WITH([realvnc],
+            [AS_HELP_STRING([--with-realvnc],
+                            [support VNC using RealVNC SDK backend @<:@default=check@:>@])],
+            [],
+            [with_realvnc=check])
+
+if test "x$with_vnc" != "xno" -a "x$with_realvnc" != "xno" -a "x$vnc_backend" = "x"
+then
+    vnc_backend=RealVNC
+    have_realvnc=yes
+    AC_CHECK_LIB([vncsdk], [vnc_Viewer_create], [VNC_LIBS="$VNC_LIBS -lvncsdk"], [have_realvnc=no])
+fi
+
+#
 # libVNCServer
 #
 
 have_libvncserver=disabled
-VNC_LIBS=
-AC_ARG_WITH([vnc],
-            [AS_HELP_STRING([--with-vnc],
-                            [support VNC @<:@default=check@:>@])],
+AC_ARG_WITH([libvncserver],
+            [AS_HELP_STRING([--with-libvncserver],
+                            [support VNC using libVNCServer backend @<:@default=check@:>@])],
             [],
-            [with_vnc=check])
+            [with_libvncserver=check])
 
-if test "x$with_vnc" != "xno"
+if test "x$with_vnc" != "xno" -a "x$with_libvncserver" != "xno" -a "x$vnc_backend" = "x"
 then
+    vnc_backend=libVNCServer
     have_libvncserver=yes
     AC_CHECK_LIB([vncclient], [rfbInitClient], [VNC_LIBS="$VNC_LIBS -lvncclient"], [have_libvncserver=no])
 fi
 
-AM_CONDITIONAL([ENABLE_VNC], [test "x${have_libvncserver}" = "xyes"])
+AM_CONDITIONAL([ENABLE_LIBVNCSERVER], [test "x${have_libvncserver}" = "xyes"])
+AM_CONDITIONAL([ENABLE_REALVNC],      [test "x${have_realvnc}"      = "xyes"])
+AM_CONDITIONAL([ENABLE_VNC],          [test "x${vnc_backend}" != "x"])
 AC_SUBST(VNC_LIBS)
 
 #
@@ -1323,11 +1355,11 @@ AC_OUTPUT
 # Protocol build status
 #
 
-AM_COND_IF([ENABLE_KUBERNETES], [build_kubernetes=yes], [build_kubernetes=no])
-AM_COND_IF([ENABLE_RDP],        [build_rdp=yes],        [build_rdp=no])
-AM_COND_IF([ENABLE_SSH],        [build_ssh=yes],        [build_ssh=no])
-AM_COND_IF([ENABLE_TELNET],     [build_telnet=yes],     [build_telnet=no])
-AM_COND_IF([ENABLE_VNC],        [build_vnc=yes],        [build_vnc=no])
+AM_COND_IF([ENABLE_KUBERNETES], [build_kubernetes=yes],             [build_kubernetes=no])
+AM_COND_IF([ENABLE_RDP],        [build_rdp=yes],                    [build_rdp=no])
+AM_COND_IF([ENABLE_SSH],        [build_ssh=yes],                    [build_ssh=no])
+AM_COND_IF([ENABLE_TELNET],     [build_telnet=yes],                 [build_telnet=no])
+AM_COND_IF([ENABLE_VNC],        [build_vnc="yes (${vnc_backend})"], [build_vnc=no])
 
 #
 # Service / tool build status
@@ -1373,6 +1405,7 @@ $PACKAGE_NAME version $PACKAGE_VERSION
      libpulse ............ ${have_pulse}
      libwebsockets ....... ${have_libwebsockets}
      libwebp ............. ${have_webp}
+     RealVNC SDK ......... ${have_realvnc}
      wsock32 ............. ${have_winsock}
 
    Protocol support:
