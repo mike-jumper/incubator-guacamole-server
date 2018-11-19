@@ -32,8 +32,13 @@ noinst_LTLIBRARIES = libguac_vnc_backend.la
 # Common interface
 #
 
-noinst_HEADERS = \
-    client.h     \
+noinst_HEADERS =  \
+    backend.h     \
+    callbacks.h   \
+    client.h      \
+    clipboard.h   \
+    framebuffer.h \
+    input.h       \
     settings.h
 
 libguac_vnc_backend_la_CFLAGS = \
@@ -43,6 +48,7 @@ libguac_vnc_backend_la_CFLAGS = \
 
 libguac_vnc_backend_la_LIBADD = \
     @LIBGUAC_LTLIB@             \
+    @CAIRO_LIBS@                \
     @VNC_LIBS@
 
 #
@@ -54,7 +60,11 @@ noinst_HEADERS +=                  \
     realvnc-impl/client-internal.h
 
 libguac_vnc_backend_la_SOURCES = \
-    realvnc-impl/client.c
+    realvnc-impl/backend.c       \
+    realvnc-impl/client.c        \
+    realvnc-impl/clipboard.c     \
+    realvnc-impl/framebuffer.c   \
+    realvnc-impl/input.c
 endif
 
 #
@@ -65,7 +75,11 @@ if ENABLE_LIBVNCSERVER
 noinst_HEADERS +=                       \
     libvncserver-impl/client-internal.h
 
-libguac_vnc_backend_la_SOURCES = \
-    libvncserver-impl/client.c
+libguac_vnc_backend_la_SOURCES =    \
+    libvncserver-impl/backend.c     \
+    libvncserver-impl/client.c      \
+    libvncserver-impl/clipboard.c   \
+    libvncserver-impl/framebuffer.c \
+    libvncserver-impl/input.c
 endif
 

@@ -53,6 +53,13 @@ typedef struct guac_vnc_backend_settings {
     char* encodings;
 
     /**
+     * Whether the red and blue components of each color should be swapped.
+     * This is mainly used for VNC servers that do not properly handle
+     * colors.
+     */
+    bool swap_red_blue;
+
+    /**
      * The color depth to request, in bits.
      */
     int color_depth;

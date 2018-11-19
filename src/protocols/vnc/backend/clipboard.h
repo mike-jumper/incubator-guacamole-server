@@ -17,26 +17,27 @@
  * under the License.
  */
 
-#include "backend/callbacks.h"
+#ifndef GUAC_VNC_BACKEND_CLIPBOARD_H
+#define GUAC_VNC_BACKEND_CLIPBOARD_H
+
 #include "backend/client.h"
-#include "client-internal.h"
 
-#include <guacamole/client.h>
-#include <stdlib.h>
+/**
+ * Sends the given text to the VNC server, setting the clipboard within the VNC
+ * session. The VNC standard requires that all clipboard is encoded in ISO
+ * 8859-1.
+ *
+ * @param backend_client
+ *     The VNC client to use to send the clipboard data.
+ *
+ * @param text
+ *     The clipboard data to send, encoded in ISO 8859-1.
+ *
+ * @param length
+ *     The length of the data to send, in bytes.
+ */
+void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
+        char* text, int length);
 
-guac_vnc_backend_client* guac_vnc_backend_client_create(guac_client* client,
-        guac_vnc_backend_settings* settings,
-        guac_vnc_backend_callbacks* callbacks) {
-
-    /* TODO: STUB */
-    return NULL;
-
-}
-
-void guac_vnc_backend_client_free(guac_client* client,
-        guac_vnc_backend_client* backend_client) {
-
-    /* TODO: STUB */
-
-}
+#endif
 

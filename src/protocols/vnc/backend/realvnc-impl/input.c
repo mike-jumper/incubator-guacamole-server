@@ -17,24 +17,20 @@
  * under the License.
  */
 
-#include "backend/callbacks.h"
 #include "backend/client.h"
 #include "client-internal.h"
 
-#include <guacamole/client.h>
-#include <stdlib.h>
+#include <stdbool.h>
 
-guac_vnc_backend_client* guac_vnc_backend_client_create(guac_client* client,
-        guac_vnc_backend_settings* settings,
-        guac_vnc_backend_callbacks* callbacks) {
+void guac_vnc_backend_send_key(guac_vnc_backend_client* backend_client,
+        int keysym, bool pressed) {
 
     /* TODO: STUB */
-    return NULL;
 
 }
 
-void guac_vnc_backend_client_free(guac_client* client,
-        guac_vnc_backend_client* backend_client) {
+void guac_vnc_backend_send_pointer(guac_vnc_backend_client* backend_client,
+        int x, int y, int mask) {
 
     /* TODO: STUB */
 

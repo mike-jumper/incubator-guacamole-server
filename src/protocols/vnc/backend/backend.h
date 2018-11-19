@@ -17,26 +17,28 @@
  * under the License.
  */
 
-#include "backend/callbacks.h"
-#include "backend/client.h"
-#include "client-internal.h"
+#ifndef GUAC_VNC_BACKEND_H
+#define GUAC_VNC_BACKEND_H
 
 #include <guacamole/client.h>
-#include <stdlib.h>
 
-guac_vnc_backend_client* guac_vnc_backend_client_create(guac_client* client,
-        guac_vnc_backend_settings* settings,
-        guac_vnc_backend_callbacks* callbacks) {
+/**
+ * Performs any necessary static initialization of the backend which must occur
+ * before any connection attempt is made. This function MUST be invoked before
+ * any other VNC backend function is called.
+ *
+ * @param client
+ *     The guac_client associated with the VNC connection that will eventually
+ *     be established.
+ */
+void guac_vnc_backend_init(guac_client* client);
 
-    /* TODO: STUB */
-    return NULL;
+/**
+ * Performs any necessary static cleanup tasks required by the backend after it
+ * will no longer be used by the current process. This function MUST be invoked
+ * after the VNC backend will no longer be used.
+ */
+void guac_vnc_backend_shutdown();
 
-}
-
-void guac_vnc_backend_client_free(guac_client* client,
-        guac_vnc_backend_client* backend_client) {
-
-    /* TODO: STUB */
-
-}
+#endif
 

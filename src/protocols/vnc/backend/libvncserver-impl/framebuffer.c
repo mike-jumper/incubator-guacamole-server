@@ -17,26 +17,28 @@
  * under the License.
  */
 
-#include "backend/callbacks.h"
 #include "backend/client.h"
 #include "client-internal.h"
 
-#include <guacamole/client.h>
-#include <stdlib.h>
-
-guac_vnc_backend_client* guac_vnc_backend_client_create(guac_client* client,
-        guac_vnc_backend_settings* settings,
-        guac_vnc_backend_callbacks* callbacks) {
+int guac_vnc_backend_framebuffer_wait(guac_vnc_backend_client* backend_client,
+        int timeout) {
 
     /* TODO: STUB */
-    return NULL;
+    return 1;
 
 }
 
-void guac_vnc_backend_client_free(guac_client* client,
-        guac_vnc_backend_client* backend_client) {
+int guac_vnc_backend_framebuffer_get_width(guac_vnc_backend_client* backend_client) {
 
     /* TODO: STUB */
+    return 0;
+
+}
+
+int guac_vnc_backend_framebuffer_get_height(guac_vnc_backend_client* backend_client) {
+
+    /* TODO: STUB */
+    return 0;
 
 }
 

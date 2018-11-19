@@ -22,6 +22,7 @@
 
 #include <guacamole/client.h>
 
+#include "backend/callbacks.h"
 #include "backend/settings.h"
 
 /**
@@ -54,7 +55,8 @@ typedef struct guac_vnc_backend_client guac_vnc_backend_client;
  *     connection fails.
  */
 guac_vnc_backend_client* guac_vnc_backend_client_create(guac_client* client,
-        guac_vnc_backend_settings* settings);
+        guac_vnc_backend_settings* settings,
+        guac_vnc_backend_callbacks* callbacks);
 
 /**
  * Frees the given guac_vnc_backend_client instance, disconnecting the
