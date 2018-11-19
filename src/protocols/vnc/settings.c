@@ -41,21 +41,16 @@ const char* GUAC_VNC_CLIENT_ARGS[] = {
     "cursor",
     "autoretry",
     "clipboard-encoding",
-
-#ifdef ENABLE_VNC_REPEATER
     "dest-host",
     "dest-port",
-#endif
 
 #ifdef ENABLE_PULSE
     "enable-audio",
     "audio-servername",
 #endif
 
-#ifdef ENABLE_VNC_LISTEN
     "reverse-connect",
     "listen-timeout",
-#endif
 
 #ifdef ENABLE_COMMON_SSH
     "enable-sftp",
@@ -144,7 +139,6 @@ enum VNC_ARGS_IDX {
      */
     IDX_CLIPBOARD_ENCODING,
 
-#ifdef ENABLE_VNC_REPEATER
     /**
      * The VNC host to connect to, if using a repeater.
      */
@@ -154,7 +148,6 @@ enum VNC_ARGS_IDX {
      * The VNC port to connect to, if using a repeater.
      */
     IDX_DEST_PORT,
-#endif
 
 #ifdef ENABLE_PULSE
     /**
@@ -169,7 +162,6 @@ enum VNC_ARGS_IDX {
     IDX_AUDIO_SERVERNAME,
 #endif
 
-#ifdef ENABLE_VNC_LISTEN
     /**
      * "true" if not actually connecting to a VNC server, but rather listening
      * for a connection from the VNC server (reverse connection), "false" or
@@ -182,7 +174,6 @@ enum VNC_ARGS_IDX {
      * milliseconds. If unspecified, this will default to 5000.
      */
     IDX_LISTEN_TIMEOUT,
-#endif
 
 #ifdef ENABLE_COMMON_SSH
     /**
@@ -353,7 +344,6 @@ guac_vnc_settings* guac_vnc_parse_args(guac_user* user,
         guac_user_parse_args_int(user, GUAC_VNC_CLIENT_ARGS, argv,
                 IDX_COLOR_DEPTH, 0);
 
-#ifdef ENABLE_VNC_REPEATER
     /* Set repeater parameters if specified */
     settings->dest_host =
         guac_user_parse_args_string(user, GUAC_VNC_CLIENT_ARGS, argv,
@@ -363,7 +353,6 @@ guac_vnc_settings* guac_vnc_parse_args(guac_user* user,
     settings->dest_port =
         guac_user_parse_args_int(user, GUAC_VNC_CLIENT_ARGS, argv,
                 IDX_DEST_PORT, 0);
-#endif
 
     /* Set encodings if specified */
     settings->encodings =
@@ -376,7 +365,6 @@ guac_vnc_settings* guac_vnc_parse_args(guac_user* user,
         guac_user_parse_args_int(user, GUAC_VNC_CLIENT_ARGS, argv,
                 IDX_AUTORETRY, 0);
 
-#ifdef ENABLE_VNC_LISTEN
     /* Set reverse-connection flag */
     settings->reverse_connect =
         guac_user_parse_args_boolean(user, GUAC_VNC_CLIENT_ARGS, argv,
@@ -386,7 +374,6 @@ guac_vnc_settings* guac_vnc_parse_args(guac_user* user,
     settings->listen_timeout =
         guac_user_parse_args_int(user, GUAC_VNC_CLIENT_ARGS, argv,
                 IDX_LISTEN_TIMEOUT, 5000);
-#endif
 
 #ifdef ENABLE_PULSE
     /* Audio enable/disable */
@@ -506,10 +493,8 @@ void guac_vnc_settings_free(guac_vnc_settings* settings) {
     free(settings->recording_name);
     free(settings->recording_path);
 
-#ifdef ENABLE_VNC_REPEATER
     /* Free VNC repeater settings */
     free(settings->dest_host);
-#endif
 
 #ifdef ENABLE_COMMON_SSH
     /* Free SFTP settings */

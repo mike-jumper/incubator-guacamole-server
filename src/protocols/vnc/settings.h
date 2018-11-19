@@ -72,7 +72,6 @@ typedef struct guac_vnc_settings {
      */
     bool read_only;
 
-#ifdef ENABLE_VNC_REPEATER
     /**
      * The VNC host to connect to, if using a repeater.
      */
@@ -82,9 +81,7 @@ typedef struct guac_vnc_settings {
      * The VNC port to connect to, if using a repeater.
      */
     int dest_port;
-#endif
 
-#ifdef ENABLE_VNC_LISTEN
     /**
      * Whether not actually connecting to a VNC server, but rather listening
      * for a connection from the VNC server (reverse connection).
@@ -96,7 +93,6 @@ typedef struct guac_vnc_settings {
      * milliseconds.
      */
     int listen_timeout;
-#endif
 
     /**
      * Whether the cursor should be rendered on the server (remote) or on the
