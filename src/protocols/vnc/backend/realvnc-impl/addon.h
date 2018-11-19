@@ -17,16 +17,28 @@
  * under the License.
  */
 
+#ifndef GUAC_VNC_BACKEND_ADDON_H
+#define GUAC_VNC_BACKEND_ADDON_H
+
 #include <guacamole/client.h>
 
-void guac_vnc_backend_init(guac_client* client) {
+/**
+ * The pattern which matches all RealVNC add-on code files. These files will be
+ * read automatically if guac_realvnc_enable_addons() is invoked.
+ */
+#define GUAC_REALVNC_ADDON_CODE_GLOB "/etc/guacamole/realvnc/*.addon"
 
-    /* Log that we're using the libvncclient backend */
-    guac_client_log(client, GUAC_LOG_INFO, "VNC backend: RealVNC SDK");
+/**
+ * Reads and enables the add-ons corresponding to the RealVNC add-on codes in
+ * each of the files matching GUAC_REALVNC_ADDON_CODE_GLOB. If any file cannot
+ * be read, a warning is logged and the operation proceeds with the next
+ * matching file.
+ *
+ * @param client
+ *     The guac_client associated with the VNC connection leveraging the
+ *     RealVNC SDK.
+ */
+void guac_realvnc_enable_addons(guac_client* client);
 
-}
-
-void guac_vnc_backend_shutdown() {
-    /* Do nothing - shutdown must occur from within thread calling vnc_init() */
-}
+#endif
 

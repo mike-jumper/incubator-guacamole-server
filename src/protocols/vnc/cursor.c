@@ -22,9 +22,8 @@
 
 #include <guacamole/client.h>
 
-void guac_vnc_cursor_updated(int x, int y,
-        unsigned char* image, int width, int height, int stride,
-        void* data) {
+void guac_vnc_cursor_updated(int x, int y, const unsigned char* image,
+        int width, int height, int stride, void* data) {
 
     guac_client* client = (guac_client*) data;
     guac_vnc_client* vnc_client = (guac_vnc_client*) client->data;

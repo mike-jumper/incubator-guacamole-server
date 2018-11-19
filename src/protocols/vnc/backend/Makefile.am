@@ -56,15 +56,27 @@ libguac_vnc_backend_la_LIBADD = \
 #
 
 if ENABLE_REALVNC
-noinst_HEADERS +=                  \
-    realvnc-impl/client-internal.h
+noinst_HEADERS +=                       \
+    realvnc-impl/addon.h                \
+    realvnc-impl/auth-internal.h        \
+    realvnc-impl/client-internal.h      \
+    realvnc-impl/clipboard-internal.h   \
+    realvnc-impl/event.h                \
+    realvnc-impl/framebuffer-internal.h \
+    realvnc-impl/log.h                  \
+    realvnc-impl/main.h
 
 libguac_vnc_backend_la_SOURCES = \
+    realvnc-impl/addon.c         \
+    realvnc-impl/auth.c          \
     realvnc-impl/backend.c       \
     realvnc-impl/client.c        \
     realvnc-impl/clipboard.c     \
+    realvnc-impl/event.c         \
     realvnc-impl/framebuffer.c   \
-    realvnc-impl/input.c
+    realvnc-impl/input.c         \
+    realvnc-impl/log.c           \
+    realvnc-impl/main.c
 endif
 
 #

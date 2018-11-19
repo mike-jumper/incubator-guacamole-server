@@ -66,7 +66,7 @@ typedef void guac_vnc_backend_clipboard_received(const char* text, int length,
  *     structure provided when the guac_vnc_backend_client was allocated.
  */
 typedef void guac_vnc_backend_cursor_updated(int x, int y,
-        unsigned char* image, int width, int height, int stride,
+        const unsigned char* image, int width, int height, int stride,
         void* data);
 
 /**
@@ -151,7 +151,7 @@ typedef void guac_vnc_backend_framebuffer_copied(int sx, int sy,
  *     structure provided when the guac_vnc_backend_client was allocated.
  */
 typedef void guac_vnc_backend_framebuffer_updated(int x, int y,
-        unsigned char* image, int width, int height, int stride,
+        const unsigned char* image, int width, int height, int stride,
         void* data);
 
 /**

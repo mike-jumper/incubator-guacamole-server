@@ -24,7 +24,7 @@
 #include <cairo/cairo.h>
 #include <guacamole/client.h>
 
-void guac_vnc_framebuffer_updated(int x, int y, unsigned char* image,
+void guac_vnc_framebuffer_updated(int x, int y, const unsigned char* image,
         int width, int height, int stride, void* data) {
 
     guac_client* client = (guac_client*) data;
@@ -35,7 +35,8 @@ void guac_vnc_framebuffer_updated(int x, int y, unsigned char* image,
         return;
 
     /* Create surface from received image buffer */
-    cairo_surface_t* surface = cairo_image_surface_create_for_data(image,
+    cairo_surface_t* surface = cairo_image_surface_create_for_data(
+            (unsigned char*) image /* We won't be modifying this data */,
             CAIRO_FORMAT_RGB24, width, height, stride);
 
     /* Draw directly to default layer */

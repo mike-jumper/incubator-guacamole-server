@@ -19,20 +19,40 @@
 
 #include "backend/client.h"
 #include "client-internal.h"
+#include "event.h"
 
 #include <stdbool.h>
 
 void guac_vnc_backend_send_key(guac_vnc_backend_client* backend_client,
         int keysym, bool pressed) {
 
-    /* TODO: STUB */
+    guac_realvnc_event event = {
+        .type = GUAC_REALVNC_EVENT_CLIENT_KEYBOARD,
+        .details.keyboard = {
+            .keysym = keysym,
+            .pressed = pressed
+        }
+    };
+
+    /* Forward keyboard event via main event loop */
+    guac_realvnc_event_write(backend_client->event_write_fd, &event);
 
 }
 
 void guac_vnc_backend_send_pointer(guac_vnc_backend_client* backend_client,
         int x, int y, int mask) {
 
-    /* TODO: STUB */
+    guac_realvnc_event event = {
+        .type = GUAC_REALVNC_EVENT_CLIENT_POINTER,
+        .details.pointer = {
+            .x = x,
+            .y = y,
+            .mask = mask
+        }
+    };
+
+    /* Forward pointer event via main event loop */
+    guac_realvnc_event_write(backend_client->event_write_fd, &event);
 
 }
 

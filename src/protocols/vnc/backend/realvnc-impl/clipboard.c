@@ -20,10 +20,25 @@
 #include "backend/client.h"
 #include "client-internal.h"
 
-void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
+#include <vnc/Viewer.h>
+
+#include <string.h>
+
+void guac_realvnc_clipboard_changed(void* data, vnc_Viewer* viewer,
         const char* text) {
 
-    /* TODO: STUB */
+    guac_vnc_backend_client* backend_client = (guac_vnc_backend_client*) data;
 
+    /* FIXME: serverClipboardTextChanged is defined as accepting UTF-8 */
+
+    /* Notify of received clipboard data */
+    backend_client->callbacks.clipboard_received(text, strlen(text),
+            backend_client->callbacks.data);
+
+}
+
+void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
+        char* text, int length) {
+    /* FIXME: Implement */
 }
 

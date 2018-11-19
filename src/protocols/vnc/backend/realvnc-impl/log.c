@@ -19,14 +19,34 @@
 
 #include <guacamole/client.h>
 
-void guac_vnc_backend_init(guac_client* client) {
+#include <vnc/Logger.h>
 
-    /* Log that we're using the libvncclient backend */
-    guac_client_log(client, GUAC_LOG_INFO, "VNC backend: RealVNC SDK");
+void guac_realvnc_log_message(void* data, vnc_Logger_Level level,
+        const char* message) {
 
-}
+    guac_client* client = (guac_client*) data;
+    guac_client_log_level guac_level;
 
-void guac_vnc_backend_shutdown() {
-    /* Do nothing - shutdown must occur from within thread calling vnc_init() */
+    switch (level) {
+
+        /* Log errors at the error level */
+        case vnc_Logger_Error:
+            guac_level = GUAC_LOG_ERROR;
+            break;
+
+        /* Log generic messages at the info level */
+        case vnc_Logger_Basic:
+            guac_level = GUAC_LOG_INFO;
+            break;
+
+        /* Log all other messages at the debug level */
+        default:
+            guac_level = GUAC_LOG_DEBUG;
+            break;
+
+    }
+
+    guac_client_log(client, guac_level, "%s", message);
+
 }
 

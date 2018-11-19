@@ -17,16 +17,28 @@
  * under the License.
  */
 
+#ifndef GUAC_VNC_BACKEND_LOG_H
+#define GUAC_VNC_BACKEND_LOG_H
+
 #include <guacamole/client.h>
 
-void guac_vnc_backend_init(guac_client* client) {
+#include <vnc/Logger.h>
 
-    /* Log that we're using the libvncclient backend */
-    guac_client_log(client, GUAC_LOG_INFO, "VNC backend: RealVNC SDK");
+/**
+ * RealVNC SDK logger implementation which logs messages using the logging
+ * facilities of guac_client.
+ *
+ * @param data
+ *     The guac_client whose logging facilities should be used.
+ *
+ * @param level
+ *     The log level at which the message should be logged.
+ *
+ * @param message
+ *     The message to log.
+ */
+void guac_realvnc_log_message(void* data, vnc_Logger_Level level,
+        const char* message);
 
-}
-
-void guac_vnc_backend_shutdown() {
-    /* Do nothing - shutdown must occur from within thread calling vnc_init() */
-}
+#endif
 

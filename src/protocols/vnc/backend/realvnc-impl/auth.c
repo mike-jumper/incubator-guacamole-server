@@ -17,16 +17,24 @@
  * under the License.
  */
 
-#include <guacamole/client.h>
+#include "backend/client.h"
+#include "client-internal.h"
 
-void guac_vnc_backend_init(guac_client* client) {
+#include <vnc/Viewer.h>
 
-    /* Log that we're using the libvncclient backend */
-    guac_client_log(client, GUAC_LOG_INFO, "VNC backend: RealVNC SDK");
+void guac_realvnc_request_credentials(void* data, vnc_Viewer* viewer,
+        vnc_bool_t need_user, vnc_bool_t need_password) {
 
-}
+    guac_vnc_backend_client* backend_client = (guac_vnc_backend_client*) data;
 
-void guac_vnc_backend_shutdown() {
-    /* Do nothing - shutdown must occur from within thread calling vnc_init() */
+    /* Provide password upon request */
+    if (backend_client->settings.password != NULL)
+        vnc_Viewer_sendAuthenticationResponse(viewer, vnc_true, "",
+                backend_client->settings.password);
+
+    /* Cancel authentication if password required but none provided */
+    else
+        vnc_Viewer_sendAuthenticationResponse(viewer, vnc_false, "", "");
+
 }
 

@@ -17,16 +17,26 @@
  * under the License.
  */
 
-#include <guacamole/client.h>
+#ifndef GUAC_VNC_BACKEND_CLIPBOARD_INTERNAL_H
+#define GUAC_VNC_BACKEND_CLIPBOARD_INTERNAL_H
 
-void guac_vnc_backend_init(guac_client* client) {
+#include <vnc/Viewer.h>
 
-    /* Log that we're using the libvncclient backend */
-    guac_client_log(client, GUAC_LOG_INFO, "VNC backend: RealVNC SDK");
+/**
+ * Callback which is invoked by the RealVNC SDK when the clipboard changes
+ * remotely.
+ *
+ * @param data
+ *     The guac_vnc_backend_client associated with the active VNC connection.
+ *
+ * @param viewer
+ *     The vnc_Viewer instance associated with the active VNC connection.
+ *
+ * @param text
+ *     The contents of the remote clipboard as a null-terminated, UTF-8 string.
+ */
+void guac_realvnc_clipboard_changed(void* data, vnc_Viewer* viewer,
+        const char* text);
 
-}
-
-void guac_vnc_backend_shutdown() {
-    /* Do nothing - shutdown must occur from within thread calling vnc_init() */
-}
+#endif
 
