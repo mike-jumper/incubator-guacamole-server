@@ -17,17 +17,24 @@
  * under the License.
  */
 
-#ifndef GUAC_VNC_CURSOR_H
-#define GUAC_VNC_CURSOR_H
+#ifndef GUAC_VNC_BACKEND_AUTH_INTERNAL_H
+#define GUAC_VNC_BACKEND_AUTH_INTERNAL_H
 
-#include "backend/callbacks.h"
+#include <rfb/rfbclient.h>
+#include <rfb/rfbproto.h>
 
 /**
- * Callback invoked by the VNC backend when the mouse cursor has changed.
+ * Callback which is invoked by libVNCServer when it needs to read the user's
+ * VNC password. As ths user's password, if any, will be stored in the
+ * connection settings, this function does nothing more than return that value.
  *
- * @see guac_vnc_backend_cursor_updated
+ * @param client
+ *     The rfbClient associated with the VNC connection requiring the password.
+ *
+ * @return
+ *     The password to provide to the VNC server.
  */
-guac_vnc_backend_cursor_updated guac_vnc_cursor_updated;
+char* guac_libvncclient_get_password(rfbClient* client);
 
 #endif
 

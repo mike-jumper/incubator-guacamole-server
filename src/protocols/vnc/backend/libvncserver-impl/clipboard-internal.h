@@ -17,17 +17,27 @@
  * under the License.
  */
 
-#include "config.h"
+#ifndef GUAC_VNC_BACKEND_CLIPBOARD_INTERNAL_H
+#define GUAC_VNC_BACKEND_CLIPBOARD_INTERNAL_H
 
-#include "auth.h"
-#include "vnc.h"
-
-#include <guacamole/client.h>
 #include <rfb/rfbclient.h>
-#include <rfb/rfbproto.h>
 
-char* guac_vnc_get_password(rfbClient* client) {
-    guac_client* gc = rfbClientGetClientData(client, GUAC_VNC_CLIENT_KEY);
-    return ((guac_vnc_client*) gc->data)->settings->password;
-}
+/**
+ * Handler for clipboard data received via VNC, invoked by libVNCServer
+ * whenever text has been copied or cut within the VNC session.
+ *
+ * @param rfb_client
+ *     The VNC client associated with the session in which the user cut or
+ *     copied text.
+ *
+ * @param text
+ *     A buffer containing the cut/copied text.
+ *
+ * @param length
+ *     The number of bytes of cut/copied text in the buffer.
+ */
+void guac_libvncclient_cut_text(rfbClient* rfb_client,
+        const char* text, int length);
+
+#endif
 

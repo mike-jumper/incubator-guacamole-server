@@ -21,10 +21,10 @@
 #define _GUAC_VNC_CLIPBOARD_H
 
 #include "config.h"
+#include "backend/callbacks.h"
 
 #include <guacamole/client.h>
 #include <guacamole/user.h>
-#include <rfb/rfbclient.h>
 
 /**
  * Sets the encoding of clipboard data exchanged with the VNC server to the
@@ -61,20 +61,11 @@ guac_user_blob_handler guac_vnc_clipboard_blob_handler;
 guac_user_end_handler guac_vnc_clipboard_end_handler;
 
 /**
- * Handler for clipboard data received via VNC, invoked by libVNCServer
- * whenever text has been copied or cut within the VNC session.
+ * Callback invoked by the VNC backend when clipboard data has been received.
  *
- * @param client
- *     The VNC client associated with the session in which the user cut or
- *     copied text.
- *
- * @param text
- *     The string of cut/copied text.
- *
- * @param textlen
- *     The number of bytes in the string of cut/copied text.
+ * @see guac_vnc_backend_clipboard_received
  */
-void guac_vnc_cut_text(rfbClient* client, const char* text, int textlen);
+guac_vnc_backend_clipboard_received guac_vnc_clipboard_received;
 
 #endif
 

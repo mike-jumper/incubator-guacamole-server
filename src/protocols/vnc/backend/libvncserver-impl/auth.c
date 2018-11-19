@@ -17,26 +17,17 @@
  * under the License.
  */
 
-#ifndef GUAC_VNC_AUTH_H
-#define GUAC_VNC_AUTH_H
-
-#include "config.h"
+#include "backend/client.h"
+#include "client-internal.h"
 
 #include <rfb/rfbclient.h>
-#include <rfb/rfbproto.h>
 
-/**
- * Callback which is invoked by libVNCServer when it needs to read the user's
- * VNC password. As ths user's password, if any, will be stored in the
- * connection settings, this function does nothing more than return that value.
- *
- * @param client
- *     The rfbClient associated with the VNC connection requiring the password.
- *
- * @return
- *     The password to provide to the VNC server.
- */
-char* guac_vnc_get_password(rfbClient* client);
+char* guac_libvncclient_get_password(rfbClient* rfb_client) {
 
-#endif
+    guac_vnc_backend_client* backend_client =
+        rfbClientGetClientData(rfb_client, GUAC_VNC_BACKEND_CLIENT_KEY);
+
+    return backend_client->password;
+
+}
 

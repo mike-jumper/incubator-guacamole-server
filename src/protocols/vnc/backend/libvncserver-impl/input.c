@@ -20,19 +20,24 @@
 #include "backend/client.h"
 #include "client-internal.h"
 
+#include <rfb/rfbclient.h>
+#include <rfb/rfbproto.h>
+
 #include <stdbool.h>
 
 void guac_vnc_backend_send_key(guac_vnc_backend_client* backend_client,
         int keysym, bool pressed) {
 
-    /* TODO: STUB */
+    /* Send updated keyboard state as key event */
+    SendKeyEvent(backend_client->rfb_client, keysym, pressed);
 
 }
 
 void guac_vnc_backend_send_pointer(guac_vnc_backend_client* backend_client,
         int x, int y, int mask) {
 
-    /* TODO: STUB */
+    /* Send updated pointer device state as pointer event */
+    SendPointerEvent(backend_client->rfb_client, x, y, mask);
 
 }
 

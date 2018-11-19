@@ -18,16 +18,60 @@
  */
 
 #include <guacamole/client.h>
+#include <rfb/rfbclient.h>
+
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/**
+ * Static pointer to the guac_client instance that should be used for logging
+ * by libvncclient.
+ */
+guac_client* GUAC_VNC_LOGGING_CLIENT = NULL;
+
+/**
+ * Logging handler for libvncclient messages logged at the "info" level.
+ */
+static void guac_vnc_client_log_info(const char* format, ...) {
+
+    va_list args;
+
+    va_start(args, format);
+    vguac_client_log(GUAC_VNC_LOGGING_CLIENT, GUAC_LOG_INFO, format, args);
+    va_end(args);
+
+}
+
+/**
+ * Logging handler for libvncclient messages logged at the "error" level.
+ */
+static void guac_vnc_client_log_error(const char* format, ...) {
+
+    va_list args;
+
+    va_start(args, format);
+    vguac_client_log(GUAC_VNC_LOGGING_CLIENT, GUAC_LOG_ERROR, format, args);
+    va_end(args);
+
+}
 
 void guac_vnc_backend_init(guac_client* client) {
 
-    /* TODO: STUB */
+    /* Log that we're using the libvncclient backend */
+    guac_client_log(client, GUAC_LOG_INFO, "VNC backend: libVNCServer (libvncclient)");
+
+    /* Assign static pointer to client for sake of logging */
+    GUAC_VNC_LOGGING_CLIENT = client;
+
+    /* Override libvncclient's default logging, writing instead to the
+     * guac_client log */
+    rfbClientLog = guac_vnc_client_log_info;
+    rfbClientErr = guac_vnc_client_log_error;
 
 }
 
 void guac_vnc_backend_shutdown() {
-
-    /* TODO: STUB */
-
+    /* libvncclient does not require static shutdown */
 }
 

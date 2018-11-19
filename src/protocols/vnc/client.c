@@ -19,6 +19,8 @@
 
 #include "config.h"
 
+#include "backend/backend.h"
+#include "backend/client.h"
 #include "common/recording.h"
 #include "client.h"
 #include "user.h"
@@ -40,6 +42,9 @@
 #include <string.h>
 
 int guac_client_init(guac_client* client) {
+
+    /* Initialize VNC backend */
+    guac_vnc_backend_init(client);
 
     /* Set client args */
     client->args = GUAC_VNC_CLIENT_ARGS;
@@ -64,28 +69,16 @@ int guac_vnc_client_free_handler(guac_client* client) {
     guac_vnc_client* vnc_client = (guac_vnc_client*) client->data;
     guac_vnc_settings* settings = vnc_client->settings;
 
-    /* Clean up VNC client*/
-    rfbClient* rfb_client = vnc_client->rfb_client;
-    if (rfb_client != NULL) {
-
-        /* Wait for client thread to finish */
+    /* Wait for client thread to finish */
+    if (vnc_client->client_thread_created)
         pthread_join(vnc_client->client_thread, NULL);
 
-        /* Free memory not free'd by libvncclient's rfbClientCleanup() */
-        if (rfb_client->frameBuffer != NULL) free(rfb_client->frameBuffer);
-        if (rfb_client->raw_buffer != NULL) free(rfb_client->raw_buffer);
-        if (rfb_client->rcSource != NULL) free(rfb_client->rcSource);
+    /* Clean up VNC backend client */
+    if (vnc_client->backend_client)
+        guac_vnc_backend_client_free(client, vnc_client->backend_client);
 
-        /* Free VNC rfbClientData linked list (not free'd by rfbClientCleanup()) */
-        while (rfb_client->clientData != NULL) {
-            rfbClientData* next = rfb_client->clientData->next;
-            free(rfb_client->clientData);
-            rfb_client->clientData = next;
-        }
-
-        rfbClientCleanup(rfb_client);
-
-    }
+    /* Shutdown VNC backend */
+    guac_vnc_backend_shutdown();
 
 #ifdef ENABLE_COMMON_SSH
     /* Free SFTP filesystem, if loaded */

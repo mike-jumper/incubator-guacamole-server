@@ -27,11 +27,11 @@
 #include "common/iconv.h"
 #include "common/recording.h"
 #include "common/surface.h"
+#include "backend/client.h"
 #include "settings.h"
 
 #include <guacamole/client.h>
 #include <guacamole/layer.h>
-#include <rfb/rfbclient.h>
 
 #ifdef ENABLE_PULSE
 #include "pulse/pulse.h"
@@ -44,6 +44,7 @@
 #endif
 
 #include <pthread.h>
+#include <stdbool.h>
 
 /**
  * VNC-specific client data.
@@ -56,21 +57,15 @@ typedef struct guac_vnc_client {
     pthread_t client_thread;
 
     /**
+     * Whether the VNC client thread was successfully created and should be
+     * joined prior to cleanup.
+     */
+    bool client_thread_created;
+
+    /**
      * The underlying VNC client.
      */
-    rfbClient* rfb_client;
-
-    /**
-     * The original framebuffer malloc procedure provided by the initialized
-     * rfbClient.
-     */
-    MallocFrameBufferProc rfb_MallocFrameBuffer;
-
-    /**
-     * Whether copyrect  was used to produce the latest update received
-     * by the VNC server.
-     */
-    int copy_rect_used;
+    guac_vnc_backend_client* backend_client;
 
     /**
      * Client settings, parsed from args.
@@ -130,21 +125,6 @@ typedef struct guac_vnc_client {
 } guac_vnc_client;
 
 /**
- * Allocates a new rfbClient instance given the parameters stored within the
- * client, returning NULL on failure.
- *
- * @param client
- *     The guac_client associated with the settings of the desired VNC
- *     connection.
- *
- * @return
- *     A new rfbClient instance allocated and connected according to the
- *     parameters stored within the given client, or NULL if connecting to the
- *     VNC server fails.
- */
-rfbClient* guac_vnc_get_client(guac_client* client);
-
-/**
  * VNC client thread. This thread initiates the VNC connection and ultimately
  * runs throughout the duration of the client, existing as a single instance,
  * shared by all users.
@@ -156,12 +136,6 @@ rfbClient* guac_vnc_get_client(guac_client* client);
  *     Always NULL.
  */
 void* guac_vnc_client_thread(void* data);
-
-/**
- * Key which can be used with the rfbClientGetClientData function to return
- * the associated guac_client.
- */
-extern char* GUAC_VNC_CLIENT_KEY;
 
 #endif
 

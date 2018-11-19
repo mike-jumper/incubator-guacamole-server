@@ -30,25 +30,21 @@ lib_LTLIBRARIES = libguac-client-vnc.la
 SUBDIRS = backend
 
 libguac_client_vnc_la_SOURCES = \
-    auth.c                      \
     client.c                    \
     clipboard.c                 \
     cursor.c                    \
     display.c                   \
     input.c                     \
-    log.c                       \
     settings.c                  \
     user.c                      \
     vnc.c
     
 noinst_HEADERS =      \
-    auth.h            \
     client.h          \
     clipboard.h       \
     cursor.h          \
     display.h         \
     input.h           \
-    log.h             \
     settings.h        \
     user.h            \
     vnc.h

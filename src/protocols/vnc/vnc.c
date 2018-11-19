@@ -19,16 +19,17 @@
 
 #include "config.h"
 
-#include "auth.h"
+#include "backend/callbacks.h"
+#include "backend/client.h"
+#include "backend/framebuffer.h"
+#include "backend/settings.h"
 #include "client.h"
 #include "clipboard.h"
-#include "common/clipboard.h"
 #include "common/cursor.h"
 #include "common/display.h"
 #include "common/recording.h"
 #include "cursor.h"
 #include "display.h"
-#include "log.h"
 #include "settings.h"
 #include "vnc.h"
 
@@ -46,120 +47,59 @@
 #include <guacamole/protocol.h>
 #include <guacamole/socket.h>
 #include <guacamole/timestamp.h>
-#include <rfb/rfbclient.h>
-#include <rfb/rfbproto.h>
 
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-char* GUAC_VNC_CLIENT_KEY = "GUAC_VNC";
+static guac_vnc_backend_client* guac_vnc_connect(guac_client* client,
+        guac_vnc_settings* settings) {
 
-rfbClient* guac_vnc_get_client(guac_client* client) {
+    guac_vnc_backend_callbacks callbacks = {
+        .clipboard_received = guac_vnc_clipboard_received,
+        .cursor_updated = guac_vnc_cursor_updated,
+        .framebuffer_resized = guac_vnc_framebuffer_resized,
+        .framebuffer_copied = guac_vnc_framebuffer_copied,
+        .framebuffer_updated = guac_vnc_framebuffer_updated,
+        .data = client
+    };
 
-    rfbClient* rfb_client = rfbGetClient(8, 3, 4); /* 32-bpp client */
-    guac_vnc_client* vnc_client = (guac_vnc_client*) client->data;
-    guac_vnc_settings* vnc_settings = vnc_client->settings;
+    /* Copy settings which apply to VNC backend */
+    guac_vnc_backend_settings backend_settings = {
+        .hostname = settings->hostname,
+        .port = settings->port,
+        .password = settings->password,
+        .encodings = settings->encodings,
+        .swap_red_blue = settings->swap_red_blue,
+        .color_depth = settings->color_depth,
+        .read_only = settings->read_only,
+        .dest_host = settings->dest_host,
+        .dest_port = settings->dest_port,
+        .reverse_connect = settings->reverse_connect,
+        .listen_timeout = settings->listen_timeout,
+        .remote_cursor = settings->remote_cursor
+    };
 
-    /* Store Guac client in rfb client */
-    rfbClientSetClientData(rfb_client, GUAC_VNC_CLIENT_KEY, client);
+    /* Make initial connection attempt */
+    guac_vnc_backend_client* backend_client = guac_vnc_backend_client_create(
+            client, &backend_settings, &callbacks);
 
-    /* Framebuffer update handler */
-    rfb_client->GotFrameBufferUpdate = guac_vnc_update;
-    rfb_client->GotCopyRect = guac_vnc_copyrect;
+    /* If unsuccessful, retry as many times as specified */
+    for (int retries_remaining = settings->retries;
+            !backend_client && retries_remaining > 0; retries_remaining--) {
 
-    /* Do not handle clipboard and local cursor if read-only */
-    if (vnc_settings->read_only == 0) {
+        guac_client_log(client, GUAC_LOG_INFO,
+                "Connect failed. Waiting %ims before retrying...",
+                GUAC_VNC_CONNECT_INTERVAL);
 
-        /* Clipboard */
-        rfb_client->GotXCutText = guac_vnc_cut_text;
-
-        /* Set remote cursor */
-        if (vnc_settings->remote_cursor) {
-            rfb_client->appData.useRemoteCursor = FALSE;
-        }
-
-        else {
-            /* Enable client-side cursor */
-            rfb_client->appData.useRemoteCursor = TRUE;
-            rfb_client->GotCursorShape = guac_vnc_cursor;
-        }
-
-    }
-
-    /* Password */
-    rfb_client->GetPassword = guac_vnc_get_password;
-
-    /* Depth */
-    guac_vnc_set_pixel_format(rfb_client, vnc_settings->color_depth);
-
-    /* Hook into allocation so we can handle resize. */
-    vnc_client->rfb_MallocFrameBuffer = rfb_client->MallocFrameBuffer;
-    rfb_client->MallocFrameBuffer = guac_vnc_malloc_framebuffer;
-    rfb_client->canHandleNewFBSize = 1;
-
-    /* Set hostname and port */
-    rfb_client->serverHost = strdup(vnc_settings->hostname);
-    rfb_client->serverPort = vnc_settings->port;
-
-#ifdef ENABLE_VNC_REPEATER
-    /* Set repeater parameters if specified */
-    if (vnc_settings->dest_host) {
-        rfb_client->destHost = strdup(vnc_settings->dest_host);
-        rfb_client->destPort = vnc_settings->dest_port;
-    }
-#endif
-
-#ifdef ENABLE_VNC_LISTEN
-    /* If reverse connection enabled, start listening */
-    if (vnc_settings->reverse_connect) {
-
-        guac_client_log(client, GUAC_LOG_INFO, "Listening for connections on port %i", vnc_settings->port);
-
-        /* Listen for connection from server */
-        rfb_client->listenPort = vnc_settings->port;
-        if (listenForIncomingConnectionsNoFork(rfb_client, vnc_settings->listen_timeout*1000) <= 0)
-            return NULL;
+        /* Wait for given interval then retry */
+        guac_timestamp_msleep(GUAC_VNC_CONNECT_INTERVAL);
+        backend_client = guac_vnc_backend_client_create(client,
+                &backend_settings, &callbacks);
 
     }
-#endif
 
-    /* Set encodings if provided */
-    if (vnc_settings->encodings)
-        rfb_client->appData.encodingsString = strdup(vnc_settings->encodings);
-
-    /* Connect */
-    if (rfbInitClient(rfb_client, NULL, NULL))
-        return rfb_client;
-
-    /* If connection fails, return NULL */
-    return NULL;
-
-}
-
-/**
- * Waits until data is available to be read from the given rfbClient, and thus
- * a call to HandleRFBServerMessages() should not block. If the timeout elapses
- * before data is available, zero is returned.
- *
- * @param rfb_client
- *     The rfbClient to wait for.
- *
- * @param timeout
- *     The maximum amount of time to wait, in microseconds.
- *
- * @returns
- *     A positive value if data is available, zero if the timeout elapses
- *     before data becomes available, or a negative value on error.
- */
-static int guac_vnc_wait_for_messages(rfbClient* rfb_client, int timeout) {
-
-    /* Do not explicitly wait while data is on the buffer */
-    if (rfb_client->buffered)
-        return 1;
-
-    /* If no data on buffer, wait for data on socket */
-    return WaitForMessage(rfb_client, timeout);
+    return backend_client;
 
 }
 
@@ -178,30 +118,12 @@ void* guac_vnc_client_thread(void* data) {
     /* Ensure connection is kept alive during lengthy connects */
     guac_socket_require_keep_alive(client->socket);
 
-    /* Set up libvncclient logging */
-    rfbClientLog = guac_vnc_client_log_info;
-    rfbClientErr = guac_vnc_client_log_error;
+    /* Attempt to connect to VNC server */
+    guac_vnc_backend_client* backend_client = vnc_client->backend_client =
+        guac_vnc_connect(client, settings);
 
-    /* Attempt connection */
-    rfbClient* rfb_client = guac_vnc_get_client(client);
-    int retries_remaining = settings->retries;
-
-    /* If unsuccessful, retry as many times as specified */
-    while (!rfb_client && retries_remaining > 0) {
-
-        guac_client_log(client, GUAC_LOG_INFO,
-                "Connect failed. Waiting %ims before retrying...",
-                GUAC_VNC_CONNECT_INTERVAL);
-
-        /* Wait for given interval then retry */
-        guac_timestamp_msleep(GUAC_VNC_CONNECT_INTERVAL);
-        rfb_client = guac_vnc_get_client(client);
-        retries_remaining--;
-
-    }
-
-    /* If the final connect attempt fails, return error */
-    if (!rfb_client) {
+    /* Abort immediately if unable to connect */
+    if (!backend_client) {
         guac_client_abort(client, GUAC_PROTOCOL_STATUS_UPSTREAM_NOT_FOUND,
                 "Unable to connect to VNC server.");
         return NULL;
@@ -299,9 +221,6 @@ void* guac_vnc_client_thread(void* data) {
     }
 #endif
 
-    /* Set remaining client data */
-    vnc_client->rfb_client = rfb_client;
-
     /* Set up screen recording, if requested */
     if (settings->recording_path != NULL) {
         vnc_client->recording = guac_common_recording_create(client,
@@ -315,7 +234,8 @@ void* guac_vnc_client_thread(void* data) {
 
     /* Create display */
     vnc_client->display = guac_common_display_alloc(client,
-            rfb_client->width, rfb_client->height);
+            guac_vnc_backend_framebuffer_get_width(backend_client),
+            guac_vnc_backend_framebuffer_get_height(backend_client));
 
     /* If not read-only, set an appropriate cursor */
     if (settings->read_only == 0) {
@@ -334,7 +254,7 @@ void* guac_vnc_client_thread(void* data) {
     while (client->state == GUAC_CLIENT_RUNNING) {
 
         /* Wait for start of frame */
-        int wait_result = guac_vnc_wait_for_messages(rfb_client,
+        int wait_result = guac_vnc_backend_framebuffer_wait(backend_client,
                 GUAC_VNC_FRAME_START_TIMEOUT);
         if (wait_result > 0) {
 
@@ -347,14 +267,6 @@ void* guac_vnc_client_thread(void* data) {
                 guac_timestamp frame_end;
                 int frame_remaining;
 
-                /* Handle any message received */
-                if (!HandleRFBServerMessage(rfb_client)) {
-                    guac_client_abort(client,
-                            GUAC_PROTOCOL_STATUS_UPSTREAM_ERROR,
-                            "Error handling message from VNC server.");
-                    break;
-                }
-
                 /* Calculate time remaining in frame */
                 frame_end = guac_timestamp_current();
                 frame_remaining = frame_start + GUAC_VNC_FRAME_DURATION
@@ -366,13 +278,13 @@ void* guac_vnc_client_thread(void* data) {
 
                 /* Increase the duration of this frame if client is lagging */
                 if (required_wait > GUAC_VNC_FRAME_TIMEOUT)
-                    wait_result = guac_vnc_wait_for_messages(rfb_client,
-                            required_wait*1000);
+                    wait_result = guac_vnc_backend_framebuffer_wait(
+                            backend_client, required_wait);
 
                 /* Wait again if frame remaining */
                 else if (frame_remaining > 0)
-                    wait_result = guac_vnc_wait_for_messages(rfb_client,
-                            GUAC_VNC_FRAME_TIMEOUT*1000);
+                    wait_result = guac_vnc_backend_framebuffer_wait(
+                            backend_client, GUAC_VNC_FRAME_TIMEOUT);
                 else
                     break;
 

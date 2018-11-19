@@ -36,10 +36,9 @@
 #include <guacamole/client.h>
 #include <guacamole/socket.h>
 #include <guacamole/user.h>
-#include <rfb/rfbclient.h>
-#include <rfb/rfbproto.h>
 
 #include <pthread.h>
+#include <stdbool.h>
 
 int guac_vnc_user_join_handler(guac_user* user, int argc, char** argv) {
 
@@ -70,6 +69,9 @@ int guac_vnc_user_join_handler(guac_user* user, int argc, char** argv) {
             guac_user_log(user, GUAC_LOG_ERROR, "Unable to start VNC client thread.");
             return 1;
         }
+
+        /* Client thread was successfully started */
+        vnc_client->client_thread_created = true;
 
     }
 

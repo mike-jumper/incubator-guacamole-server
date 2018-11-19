@@ -20,10 +20,26 @@
 #include "backend/client.h"
 #include "client-internal.h"
 
-void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
-        const char* text) {
+#include <rfb/rfbclient.h>
+#include <rfb/rfbproto.h>
 
-    /* TODO: STUB */
+void guac_libvncclient_cut_text(rfbClient* rfb_client,
+        const char* text, int length) {
+
+    guac_vnc_backend_client* backend_client =
+        rfbClientGetClientData(rfb_client, GUAC_VNC_BACKEND_CLIENT_KEY);
+
+    /* Notify of received clipboard data */
+    backend_client->callbacks.clipboard_received(text, length,
+            backend_client->callbacks.data);
+
+}
+
+void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
+        char* text, int length) {
+
+    /* Send provided text */
+    SendClientCutText(backend_client->rfb_client, text, length);
 
 }
 

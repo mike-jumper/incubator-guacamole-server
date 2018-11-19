@@ -72,13 +72,19 @@ endif
 #
 
 if ENABLE_LIBVNCSERVER
-noinst_HEADERS +=                       \
-    libvncserver-impl/client-internal.h
+noinst_HEADERS +=                            \
+    libvncserver-impl/auth-internal.h        \
+    libvncserver-impl/client-internal.h      \
+    libvncserver-impl/clipboard-internal.h   \
+    libvncserver-impl/cursor-internal.h      \
+    libvncserver-impl/framebuffer-internal.h
 
 libguac_vnc_backend_la_SOURCES =    \
+    libvncserver-impl/auth.c        \
     libvncserver-impl/backend.c     \
     libvncserver-impl/client.c      \
     libvncserver-impl/clipboard.c   \
+    libvncserver-impl/cursor.c      \
     libvncserver-impl/framebuffer.c \
     libvncserver-impl/input.c
 endif
