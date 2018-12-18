@@ -42,17 +42,34 @@ void guac_vnc_backend_send_key(guac_vnc_backend_client* backend_client,
 void guac_vnc_backend_send_pointer(guac_vnc_backend_client* backend_client,
         int x, int y, int mask) {
 
-    guac_realvnc_event event = {
-        .type = GUAC_REALVNC_EVENT_CLIENT_POINTER,
-        .details.pointer = {
-            .x = x,
-            .y = y,
-            .mask = mask
-        }
-    };
+    guac_realvnc_event event;
 
-    /* Forward pointer event via main event loop */
+    /* Determine which buttons have just been pressed */
+    int clicked = mask & ~backend_client->button_mask;
+
+    /* Translate clicks of the scroll wheel into scroll events */
+    if (clicked & GUAC_CLIENT_MOUSE_SCROLL_UP) {
+        event.type = GUAC_REALVNC_EVENT_CLIENT_SCROLL;
+        event.details.scroll.delta = -1;
+    }
+    else if (clicked & GUAC_CLIENT_MOUSE_SCROLL_DOWN) {
+        event.type = GUAC_REALVNC_EVENT_CLIENT_SCROLL;
+        event.details.scroll.delta = 1;
+    }
+
+    /* Translate all other mouse events into pointer events */
+    else {
+        event.type = GUAC_REALVNC_EVENT_CLIENT_POINTER;
+        event.details.pointer.x = x;
+        event.details.pointer.y = y;
+        event.details.pointer.mask = mask & 0x7; /* Exclude scroll wheel */
+    }
+
+    /* Forward pointer/scroll event via main event loop */
     guac_realvnc_event_write(backend_client->event_write_fd, &event);
+
+    /* Update current button state */
+    backend_client->button_mask = mask;
 
 }
 

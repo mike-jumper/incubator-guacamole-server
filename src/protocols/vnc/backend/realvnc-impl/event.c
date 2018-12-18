@@ -106,6 +106,7 @@ void guac_realvnc_event_process(guac_vnc_backend_client* backend_client,
         guac_realvnc_event* event) {
 
     guac_realvnc_event_pointer* pointer;
+    guac_realvnc_event_scroll* scroll;
     guac_realvnc_event_keyboard* keyboard;
     guac_realvnc_event_clipboard* clipboard;
 
@@ -116,6 +117,13 @@ void guac_realvnc_event_process(guac_vnc_backend_client* backend_client,
             pointer = &event->details.pointer;
             vnc_Viewer_sendPointerEvent(backend_client->viewer,
                     pointer->x, pointer->y, pointer->mask, vnc_false);
+            break;
+
+        /* Send scroll deltas as scroll event */
+        case GUAC_REALVNC_EVENT_CLIENT_SCROLL:
+            scroll = &event->details.scroll;
+            vnc_Viewer_sendScrollEvent(backend_client->viewer,
+                    scroll->delta, vnc_Viewer_MouseWheelVertical);
             break;
 
         /* Send updated keyboard state as key event */

@@ -162,6 +162,13 @@ struct guac_vnc_backend_client {
     bool update_received;
 
     /**
+     * The mouse button state received in the last Guacamole mouse event. Note
+     * that this is NOT the button state of the last RealVNC pointer event,
+     * which does not take scroll wheel buttons into account.
+     */
+    int button_mask;
+
+    /**
      * The callbacks provided at the time this VNC client backend was allocated.
      */
     guac_vnc_backend_callbacks callbacks;

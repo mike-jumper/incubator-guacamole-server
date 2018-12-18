@@ -22,6 +22,8 @@
 
 #include "backend/client.h"
 
+#include <vnc/Viewer.h>
+
 #include <stdbool.h>
 
 /**
@@ -39,6 +41,11 @@ typedef enum guac_realvnc_event_type {
      * Pointer event (mouse movement or click).
      */
     GUAC_REALVNC_EVENT_CLIENT_POINTER,
+
+    /**
+     * Scroll event (mouse scroll wheel).
+     */
+    GUAC_REALVNC_EVENT_CLIENT_SCROLL,
 
     /**
      * Clipboard event.
@@ -88,19 +95,31 @@ typedef struct guac_realvnc_event_pointer {
      * An integer value representing the current state of each button, where
      * the Nth bit within the integer is set to 1 if and only if the Nth button
      * on the pointer device is currently pressed. The lowest-order bit is the
-     * leftmost button, followed by the middle button, right button, and
-     * finally the up and down buttons of the scroll wheel. These mask values
-     * exactly correspond to the mask values used by the Guacamole protocol.
+     * leftmost button, followed by the middle button and right button. The
+     * scroll wheel is NOT included here. These mask values exactly correspond
+     * to a subset of the mask values used by the Guacamole protocol.
      *
      * @see GUAC_CLIENT_MOUSE_LEFT
      * @see GUAC_CLIENT_MOUSE_MIDDLE
      * @see GUAC_CLIENT_MOUSE_RIGHT
-     * @see GUAC_CLIENT_MOUSE_SCROLL_UP
-     * @see GUAC_CLIENT_MOUSE_SCROLL_DOWN
      */
     int mask;
 
 } guac_realvnc_event_pointer;
+
+/**
+ * Event details specific to mouse scroll wheel events.
+ */
+typedef struct guac_realvnc_event_scroll {
+
+    /**
+     * The number of "ticks" that the mouse has scrolled. This should be 1 for
+     * a downward scroll and -1 for an upward scroll.
+     */
+    int delta;
+
+} guac_realvnc_event_scroll;
+
 
 /**
  * Event details specific to clipboard events.
@@ -144,6 +163,12 @@ typedef struct guac_realvnc_event {
          * GUAC_REALVNC_EVENT_CLIENT_POINTER.
          */
         guac_realvnc_event_pointer pointer;
+
+        /**
+         * Details which apply to this event if the type is
+         * GUAC_REALVNC_EVENT_CLIENT_SCROLL.
+         */
+        guac_realvnc_event_scroll scroll;
 
         /**
          * Details which apply to this event if the type is
