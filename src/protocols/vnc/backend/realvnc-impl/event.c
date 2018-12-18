@@ -25,6 +25,7 @@
 #include <vnc/EventLoopFd.h>
 #include <vnc/Viewer.h>
 
+#include <stdlib.h>
 #include <sys/select.h>
 #include <unistd.h>
 
@@ -106,6 +107,7 @@ void guac_realvnc_event_process(guac_vnc_backend_client* backend_client,
 
     guac_realvnc_event_pointer* pointer;
     guac_realvnc_event_keyboard* keyboard;
+    guac_realvnc_event_clipboard* clipboard;
 
     switch (event->type) {
 
@@ -126,6 +128,13 @@ void guac_realvnc_event_process(guac_vnc_backend_client* backend_client,
             else
                 vnc_Viewer_sendKeyUp(backend_client->viewer,
                         keyboard->keysym /* Key code from vnc_Viewer_sendKeyDown() call */);
+            break;
+
+        /* Send received clipboard text */
+        case GUAC_REALVNC_EVENT_CLIENT_CLIPBOARD:
+            clipboard = &event->details.clipboard;
+            vnc_Viewer_sendClipboardText(backend_client->viewer, clipboard->text);
+            free(clipboard->text);
             break;
 
         /* Disconnect upon request */

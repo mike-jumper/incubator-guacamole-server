@@ -41,6 +41,11 @@ typedef enum guac_realvnc_event_type {
     GUAC_REALVNC_EVENT_CLIENT_POINTER,
 
     /**
+     * Clipboard event.
+     */
+    GUAC_REALVNC_EVENT_CLIENT_CLIPBOARD,
+
+    /**
      * Disconnection event.
      */
     GUAC_REALVNC_EVENT_CLIENT_DISCONNECT
@@ -98,6 +103,20 @@ typedef struct guac_realvnc_event_pointer {
 } guac_realvnc_event_pointer;
 
 /**
+ * Event details specific to clipboard events.
+ */
+typedef struct guac_realvnc_event_clipboard{
+
+    /**
+     * The new UTF-8 contents of the clipboard. This value must be manually
+     * freed using free() after the event has been handled.
+     */
+    char* text;
+
+} guac_realvnc_event_clipboard;
+
+
+/**
  * An arbitrary VNC-related event which must be eventually processed by the
  * main event loop and forwarded to the single-threaded RealVNC SDK.
  */
@@ -125,6 +144,12 @@ typedef struct guac_realvnc_event {
          * GUAC_REALVNC_EVENT_CLIENT_POINTER.
          */
         guac_realvnc_event_pointer pointer;
+
+        /**
+         * Details which apply to this event if the type is
+         * GUAC_REALVNC_EVENT_CLIENT_CLIPBOARD.
+         */
+        guac_realvnc_event_clipboard clipboard;
 
     } details;
 
