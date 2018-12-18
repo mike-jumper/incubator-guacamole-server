@@ -39,5 +39,22 @@
 void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
         char* text, int length);
 
+/**
+ * Returns the encoding which should be used for all clipboard data. The
+ * returned value MUST be one of the string values accepted for the VNC
+ * "clipboard-encoding" connection parameter, or NULL to use the value
+ * already specified within the settings.
+ *
+ * @param backend_client
+ *     The VNC client dictating the encoding to be used for clipboard data.
+ *
+ * @return
+ *     The name of the encoding to use for clipboard data, as defined by the
+ *     "clipboard-encoding" connection parameter. If the encoding already
+ *     specified within the settings should be used, NULL may be returned
+ *     instead of manually forwarding the setting value.
+ */
+const char* guac_vnc_backend_get_clipboard_encoding(guac_vnc_backend_client* backend_client);
+
 #endif
 

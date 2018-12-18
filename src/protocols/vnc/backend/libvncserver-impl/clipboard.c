@@ -23,6 +23,8 @@
 #include <rfb/rfbclient.h>
 #include <rfb/rfbproto.h>
 
+#include <stdlib.h>
+
 void guac_libvncclient_cut_text(rfbClient* rfb_client,
         const char* text, int length) {
 
@@ -41,5 +43,9 @@ void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
     /* Send provided text */
     SendClientCutText(backend_client->rfb_client, text, length);
 
+}
+
+const char* guac_vnc_backend_get_clipboard_encoding(guac_vnc_backend_client* backend_client) {
+    return NULL;
 }
 

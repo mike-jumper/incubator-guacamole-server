@@ -21,6 +21,7 @@
 
 #include "backend/callbacks.h"
 #include "backend/client.h"
+#include "backend/clipboard.h"
 #include "backend/framebuffer.h"
 #include "backend/settings.h"
 #include "client.h"
@@ -109,12 +110,6 @@ void* guac_vnc_client_thread(void* data) {
     guac_vnc_client* vnc_client = (guac_vnc_client*) client->data;
     guac_vnc_settings* settings = vnc_client->settings;
 
-    /* Configure clipboard encoding */
-    if (guac_vnc_set_clipboard_encoding(client, settings->clipboard_encoding)) {
-        guac_client_log(client, GUAC_LOG_INFO, "Using non-standard VNC "
-                "clipboard encoding: '%s'.", settings->clipboard_encoding);
-    }
-
     /* Ensure connection is kept alive during lengthy connects */
     guac_socket_require_keep_alive(client->socket);
 
@@ -127,6 +122,17 @@ void* guac_vnc_client_thread(void* data) {
         guac_client_abort(client, GUAC_PROTOCOL_STATUS_UPSTREAM_NOT_FOUND,
                 "Unable to connect to VNC server.");
         return NULL;
+    }
+
+    /* Retrieve encoding to be used for clipboard data */
+    const char* clipboard_encoding = guac_vnc_backend_get_clipboard_encoding(backend_client);
+    if (clipboard_encoding == NULL)
+        clipboard_encoding = settings->clipboard_encoding;
+
+    /* Configure clipboard encoding */
+    if (guac_vnc_set_clipboard_encoding(client, clipboard_encoding)) {
+        guac_client_log(client, GUAC_LOG_INFO, "Using non-standard VNC "
+                "clipboard encoding: '%s'.", clipboard_encoding);
     }
 
 #ifdef ENABLE_PULSE

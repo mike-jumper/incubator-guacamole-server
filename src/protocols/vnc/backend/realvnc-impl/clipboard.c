@@ -29,8 +29,6 @@ void guac_realvnc_clipboard_changed(void* data, vnc_Viewer* viewer,
 
     guac_vnc_backend_client* backend_client = (guac_vnc_backend_client*) data;
 
-    /* FIXME: serverClipboardTextChanged is defined as accepting UTF-8 */
-
     /* Notify of received clipboard data */
     backend_client->callbacks.clipboard_received(text, strlen(text),
             backend_client->callbacks.data);
@@ -40,5 +38,13 @@ void guac_realvnc_clipboard_changed(void* data, vnc_Viewer* viewer,
 void guac_vnc_backend_send_clipboard(guac_vnc_backend_client* backend_client,
         char* text, int length) {
     /* FIXME: Implement */
+}
+
+const char* guac_vnc_backend_get_clipboard_encoding(guac_vnc_backend_client* backend_client) {
+
+    /* Clipboard data within the RealVNC SDK is always UTF-8, regardless of the
+     * VNC standard */
+    return "UTF-8";
+
 }
 
