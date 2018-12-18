@@ -111,7 +111,8 @@ void* guac_realvnc_event_loop(void* data) {
     backend_client->viewer = viewer;
 
     /* Allocate space for the initial framebuffer */
-    vnc_Viewer_setViewerFb(viewer, NULL, 0, vnc_PixelFormat_rgb888(),
+    vnc_Viewer_setViewerFb(viewer, NULL, 0,
+            settings->swap_red_blue ? vnc_PixelFormat_bgr888() : vnc_PixelFormat_rgb888(),
             backend_client->width, backend_client->height, 0);
 
     /* Set all VNC client callbacks */

@@ -59,8 +59,8 @@ void guac_realvnc_notify_update(guac_vnc_backend_client* backend_client) {
 void guac_realvnc_framebuffer_resized(void* data, vnc_Viewer* viewer,
         int width, int height) {
 
-    guac_vnc_backend_client* backend_client =
-        (guac_vnc_backend_client*) data;
+    guac_vnc_backend_client* backend_client = (guac_vnc_backend_client*) data;
+    guac_vnc_backend_settings* settings = &backend_client->settings;
 
     /* Update internal tracking of width/height */
     backend_client->width = width;
@@ -71,7 +71,8 @@ void guac_realvnc_framebuffer_resized(void* data, vnc_Viewer* viewer,
             backend_client->callbacks.data);
 
     /* Allocate framebuffer with new size */
-    vnc_Viewer_setViewerFb(viewer, NULL, 0, vnc_PixelFormat_rgb888(),
+    vnc_Viewer_setViewerFb(viewer, NULL, 0,
+            settings->swap_red_blue ? vnc_PixelFormat_bgr888() : vnc_PixelFormat_rgb888(),
             width, height, 0);
 
     /* Notify that an update has been received */
