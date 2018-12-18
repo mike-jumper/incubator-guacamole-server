@@ -31,6 +31,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
 
@@ -42,6 +43,42 @@ guac_vnc_backend_client* guac_vnc_backend_client_create(guac_client* client,
     int event_pipe[2];
     if (pipe(event_pipe) == -1)
         return NULL;
+
+    /* Repeaters not currently supported */
+    if (settings->dest_host != NULL) {
+        guac_client_log(client, GUAC_LOG_ERROR, "VNC repeaters are not "
+                "currently supported by the RealVNC SDK backend.");
+        return NULL;
+    }
+
+    /* Reverse connections not currently supported */
+    if (settings->reverse_connect) {
+        guac_client_log(client, GUAC_LOG_ERROR, "Reverse VNC connections "
+                "are not currently supported by the RealVNC SDK backend.");
+        return NULL;
+    }
+
+    /* The cursor is always remote if using the RealVNC SDK to proxy VNC */
+    if (!settings->remote_cursor) {
+        guac_client_log(client, GUAC_LOG_WARNING, "The RealVNC SDK does not "
+                "provide support for proxying cursor updates. Cursor "
+                "rendering will effectively always be remote.");
+    }
+
+    /* Specifying the encodings is not supported */
+    if (strcmp(settings->encodings, "zrle ultra copyrect hextile "
+                "zlib corre rre raw") != 0) {
+        guac_client_log(client, GUAC_LOG_WARNING, "The RealVNC SDK does not "
+                "support directly specifying the VNC encodings used. "
+                "Explicitly specified encodings will be ignored.");
+    }
+
+    /* Specifying the color depth is not supported */
+    if (settings->color_depth != 0) {
+        guac_client_log(client, GUAC_LOG_WARNING, "The RealVNC SDK does not "
+                "support directly specifying the color depth. Explicitly "
+                "specified color depth will be ignored.");
+    }
 
     /* Allocate and initialize backend structure */
     guac_vnc_backend_client* backend_client = malloc(sizeof(guac_vnc_backend_client));
