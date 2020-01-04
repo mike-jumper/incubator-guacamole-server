@@ -20,7 +20,7 @@
 #ifndef GUAC_RDP_KEYBOARD_H
 #define GUAC_RDP_KEYBOARD_H
 
-#include "rdp_keymap.h"
+#include "keymap.h"
 
 #include <guacamole/client.h>
 
